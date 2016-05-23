@@ -74,8 +74,8 @@ class CreateCSV(QtGui.QWidget):
                 textFile = open(self.endPath + directory + ".csv", 'w')
                 textFile.write(parsedFiles)
                 textFile.close()
-
                 label += 1
+                self.dataPaths.clear()
 
     def get_images(self):
         return self.dataPaths
