@@ -50,7 +50,9 @@ class CreateCSV(QtGui.QWidget):
 
     def butClicked(self):
         self.path = self.pathEdit.text()
+        self.path = self.path + "/"
         self.endPath = self.endEdit.text()
+        self.endPath = self.endPath + "/"
         self.pathEdit.clear()
         self.endEdit.clear()
         self.run()
@@ -65,7 +67,7 @@ class CreateCSV(QtGui.QWidget):
                 subject_path = os.path.join(root, directory)
                 for filename in os.listdir(subject_path):
                     absPath = subject_path + "/" + filename
-                    current_path = absPath + SEPARATOR + str(label)
+                    current_path = absPath + SEPARATOR
                     self.dataPaths.append(current_path)
                     self.count += 1
                 self.dataPaths.append(DATASEPRATOR + directory + " count : " + str(self.count))

@@ -7,7 +7,7 @@
 import cv2
 import sys
 from PyQt4 import QtCore, QtGui
-import gtk
+
 
 class CascadeClassifier(QtGui.QWidget):
     def __init__(self):
