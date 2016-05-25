@@ -62,19 +62,22 @@ class FaceRecognition:
             seekLength += 1
         return seekLength
 
+    # calculate zero mean data
+    def zero_mean_data(data):
+        columns = len(data[0])
+        for i in range(columns):
+            tmp = np.mean(data.T[i], axis=0)
+            data.T[i] = data.T[i] - tmp
+        return data
+
     # calculate covariance matrix
-    @staticmethod
     def covariance(data):
-        mean = data.mean()  # mean of data
-        zero_mean_data = data - mean  # zero mean data
-        data_transposed = zero_mean_data.T  # transpose data
-        cov_matrix = np.multiply(zero_mean_data, data_transposed)  # matrix multiplication X * X'
-        cov_matrix /= (data.shape[0] - 1)  # cov / n - 1
+        divsor = len(data) - 1
 
-        for i in range(len(cov_matrix[0])):
-            print(cov_matrix[i])
-
-        return cov_matrix
+        tData = data.T
+        covMatrix = np.dot(tData, data)
+        covMatrix = np.divide(covMatrix, divsor)
+        return covMatrix
 
     # calculate pca coefficients with covariance matrix (150 * 150)
         covMatrix = FaceRecognition.covariance(data)
