@@ -109,12 +109,21 @@ class FaceRecognition:
         self.smilCovMatrix = self.zero_mean_data(self.smileFeatureVector)
         self.sadCovMatrix = self.covariance(self.sadCovMatrix)
         self.smilCovMatrix = self.covariance(self.smilCovMatrix)
-
         print(self.sadCovMatrix.shape)
         print(self.smilCovMatrix.shape)
 
-    # #   now we have max 150 eiginvector
-    #     eig_vals, eig_vecs = np.linalg.eig(cov_matrix)
+        # now we have max 75 eiginvector for each category
+        self.eigValsSad, self.eigVecsSad = np.linalg.eig(self.sadCovMatrix)
+        self.weight = (self.eigValsSad / self.eigValsSad.max()) * 100
+        print(self.eigValsSad[self.weight > 1.3])
+        self.weight = self.weight > 1.3         # get boolean indexing to access vectors
+        print(self.weight)
+
+        self.eigValsSmile, self.eigVecsSmile = np.linalg.eig(self.smilCovMatrix)
+        self.weight = (self.eigValsSmile / self.eigValsSmile.max()) * 100
+        print(self.eigValsSmile[self.weight > 1.3])
+        self.weight = self.weight > 1.3         # get boolean indexing to access vectors
+        print(self.weight)
     #
     # #   project data on vector to get weight matrix choose only 50 vector
     #     adjusted_data = data.T * eig_vecs
