@@ -103,12 +103,31 @@ class FaceRecognition:
         covMatrix = np.divide(covMatrix, divsor)
         return covMatrix
 
+    #   get mean image of category
+    def get_mean_image(self, data):
+        n = data.shape[1]
+        tmpMean = []
+        meanImage = []
+        for i in range(n):
+            tmpData = data[:, i]
+            tmpMean.append(tmpData.mean())
+        tmpMean = np.array(tmpMean).mean()
+        for i in range (260 * 360):
+            meanImage.append(tmpMean)
+        return np.array(meanImage, np.int32)
+
     def run(self):
+
+        #   get mean image of each category
+        self.sadMeanImage = self.get_mean_image(self.sadFeatureVector)
+        self.smileMeanImage = self.get_mean_image(self.smileFeatureVector)
+
         # calculate cov matrix
         self.normalizedSad = self.zero_mean_data(self.sadFeatureVector)
         self.normalizedSmile = self.zero_mean_data(self.smileFeatureVector)
-        print('smile shape: ', self.normalizedSmile.shape)
-        print('sad shape: ', self.normalizedSad.shape)
+
+        print('normalized smile shape: ', self.normalizedSmile.shape)
+        print('normalized sad shape: ', self.normalizedSad.shape)
 
         self.sadCovMatrix = self.covariance(self.normalizedSad)
         self.smilCovMatrix = self.covariance(self.normalizedSmile)
@@ -121,13 +140,13 @@ class FaceRecognition:
         # print(self.eigValsSad[self.weight > 1.3])
         self.weight = self.weight > 1.3  # get boolean indexing to access vectors
         self.eigVecsSad = self.eigVecsSad[self.weight]
-        print(self.eigVecsSad.shape)
+        print('sad eig vectors: ', self.eigVecsSad.shape)
 
         self.eigValsSmile, self.eigVecsSmile = np.linalg.eig(self.smilCovMatrix)
         self.weight = (self.eigValsSmile / self.eigValsSmile.max()) * 100
         self.weight = self.weight > 1.3  # get boolean indexing to access vectors
         self.eigVecsSmile = self.eigVecsSmile[self.weight]
-        print(self.eigVecsSmile.shape)
+        print('smile eig vectors: ', self.eigVecsSmile.shape)
 
         #   project data on vector to get weight matrix of sads and smiles to get eigin faces
         self.sadWeightMatrix = np.dot(self.eigVecsSad, self.normalizedSad.T)
@@ -137,13 +156,16 @@ class FaceRecognition:
         print('weight matrix of smiles: ', self.smileWeightMatrix.shape)
 
         #   get new vector and compare with old vectors with ssd
-        new_image = 0
+        #   by multiply with each eigin face after substract mean image
+        new_image = cv2.imread('/home/mohamed/workspace/Python/dataSets/front_images_part1/30b.jpg')
+        new_image = cv2.cvtColor(new_image, cv2.COLOR_BGR2GRAY)
+        new_image = new_image.reshape(-1, 1)
+        print(new_image.shape)
 
-
-        #     new_vector = eig_vecs * new_data.T
-        #
-        # #   get normalized cross correlation
-        #     e = new_vector - adjusted_data
+        #   now the idea we project new image to new space of eigin faces so we need
+        #   to compare it with all images in datasets to get minimum distance
+        #   so in our case we don't to compare to all datasets just on image sad, smile
+        #   or just compare to mean image in every category
 
         #   get ROC curve
 
