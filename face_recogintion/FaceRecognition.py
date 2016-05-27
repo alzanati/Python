@@ -9,27 +9,30 @@ from scipy import signal as sg
 
 
 class FaceRecognition:
-    def __init__(self):
-        self.smileFeatureVector = []  # list to hold smild image vectors
-        self.sadFeatureVector = []  # list to hold sad image vectors
-        self.smilePaths = []
-        self.sadPaths = []
-        self.imageLocations = []
-        self.dataPaths = []
-        self.absPaths = []
-        self.absPath = 'front_images_part1.csv'
-        self.seekLength = 0
+    def __init__(self, csvFile):
+        self.smileFeatureVector = []    # list to hold smild image vectors
+        self.sadFeatureVector = []      # list to hold sad image vectors
+        self.smilePaths = []            # smile faces paths
+        self.sadPaths = []              # sad faces paths
+        self.dataPaths = []             #
+        self.absPaths = []              # absolute paths without ";"
+        self.absPath = csvFile          # absolute path for data sets
+        self.seekLength = 0             # data set count
+        self.testImagesCount = 49       # to get 76 smile and 76 sad
 
         self.load_data_from_csv()
 
     def load_data_from_csv(self):
+
+        #   load all data sets paths from csv file
         csvFile = open(self.absPath, 'r')
         self.seekLength = self.get_seek_length(absPath=self.absPath)
         for i in range(self.seekLength):
             self.dataPaths.append(csvFile.readline())
         self.absPaths = self.get_abs_paths()
 
-        for i in range(len(self.absPaths) - 1):
+        #   divide data sets into smile and sad according to data set "b" represent smile
+        for i in range(len(self.absPaths) - self.testImagesCount):
             tmpStr = self.absPaths[i]
             tmpChar = tmpStr[-5]
             if tmpChar == 'b':
@@ -37,17 +40,20 @@ class FaceRecognition:
             elif tmpChar == 'a':
                 self.sadPaths.append(tmpStr)
 
-        # read images to vectors
+        # read smile images and convert them to (m x n) x 1 vector, and add it to list
         for i in range(len(self.smilePaths)):
             img = cv2.imread(self.smilePaths[i])
             img = img.reshape(-1, 1)
             self.smileFeatureVector.append(img)
-
+        print(len(self.smileFeatureVector))
+        # read sad images and convert them to (m x n) x 1 vector, and add it to list
         for i in range(len(self.sadPaths)):
             img = cv2.imread(self.sadPaths[i])
             img = img.reshape(-1, 1)
             self.sadFeatureVector.append(img)
+        print(len(self.sadFeatureVector))
 
+    # get absolute path of images by parsing it to remove ";"
     def get_abs_paths(self):
         for i in range(len(self.dataPaths)):
             strTmp = self.dataPaths[i]
@@ -55,6 +61,7 @@ class FaceRecognition:
             self.absPaths.append(strTmp)
         return self.absPaths
 
+    # get length of data sets ( count of images )
     def get_seek_length(self, absPath):
         csvFile = open(absPath, 'r')
         seekLength = 0
@@ -73,7 +80,6 @@ class FaceRecognition:
     # calculate covariance matrix
     def covariance(data):
         divsor = len(data) - 1
-
         tData = data.T
         covMatrix = np.dot(tData, data)
         covMatrix = np.divide(covMatrix, divsor)
@@ -99,7 +105,7 @@ class FaceRecognition:
 
 if __name__ == '__main__':
     # run algorithm
-    f = FaceRecognition()
+    f = FaceRecognition('front_images_part1.csv')
     x = np.array([[24, 24, -6, -6, -36], [0, 30, 0, 0, -30], [30, -30, 0, 30, -30]])
     y = np.ma.cov(x)
     print(y)
