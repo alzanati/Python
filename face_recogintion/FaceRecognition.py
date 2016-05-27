@@ -21,6 +21,7 @@ class FaceRecognition:
         self.testImagesCount = 49       # to get 76 smile and 76 sad
 
         self.load_data_from_csv()
+        self.run()
 
     def load_data_from_csv(self):
 
@@ -40,20 +41,33 @@ class FaceRecognition:
             elif tmpChar == 'a':
                 self.sadPaths.append(tmpStr)
 
-        # read smile images and convert them to (m x n) x 1 vector, and add it to list
+        #   read smile images and convert them to (m x n) x 1 vector, and add it to list
         for i in range(len(self.smilePaths)):
             img = cv2.imread(self.smilePaths[i])
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             img = img.reshape(-1, 1)
             self.smileFeatureVector.append(img)
-        print(len(self.smileFeatureVector))
-        # read sad images and convert them to (m x n) x 1 vector, and add it to list
+        self.smileFeatureVector = np.asarray(self.smileFeatureVector)
+        self.smileFeatureVector = self.smileFeatureVector.T[0]
+        print('smiles: \n', self.smileFeatureVector.shape)
+
+
+        #   read sad images and convert them to (m x n) x 1 vector, and add it to list
         for i in range(len(self.sadPaths)):
             img = cv2.imread(self.sadPaths[i])
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             img = img.reshape(-1, 1)
             self.sadFeatureVector.append(img)
-        print(len(self.sadFeatureVector))
+        self.sadFeatureVector = np.asarray(self.sadFeatureVector)
+        self.sadFeatureVector = self.sadFeatureVector.T[0]
+        print('sads: \n', self.sadFeatureVector.shape)
 
-    # get absolute path of images by parsing it to remove ";"
+        self.absPaths.clear()
+        self.dataPaths.clear()
+        self.sadPaths.clear()
+        self.smilePaths.clear()
+
+    #   get absolute path of images by parsing it to remove ";"
     def get_abs_paths(self):
         for i in range(len(self.dataPaths)):
             strTmp = self.dataPaths[i]
@@ -61,7 +75,7 @@ class FaceRecognition:
             self.absPaths.append(strTmp)
         return self.absPaths
 
-    # get length of data sets ( count of images )
+    #   get length of data sets ( count of images )
     def get_seek_length(self, absPath):
         csvFile = open(absPath, 'r')
         seekLength = 0
@@ -69,15 +83,19 @@ class FaceRecognition:
             seekLength += 1
         return seekLength
 
-    # calculate zero mean data
+    #   calculate zero mean data
+    @staticmethod
     def zero_mean_data(data):
-        columns = len(data[0])
-        for i in range(columns):
-            tmp = np.mean(data.T[i], axis=0)
-            data.T[i] = data.T[i] - tmp
-        return data
+        n = data.shape[1]
+        zero_data = []
+        print(n)
+        for i in range(n):
+            tmp = data[:, i]
+            zero_data.append(tmp - tmp.mean())
+        return np.array(zero_data).T
 
-    # calculate covariance matrix
+    #   calculate covariance matrix
+    @staticmethod
     def covariance(data):
         divsor = len(data) - 1
         tData = data.T
@@ -85,27 +103,44 @@ class FaceRecognition:
         covMatrix = np.divide(covMatrix, divsor)
         return covMatrix
 
-    # calculate pca coefficients with covariance matrix (150 * 150)
-        covMatrix = FaceRecognition.covariance(data)
+    def run(self):
+        # calculate cov matrix
+        self.sadCovMatrix = self.zero_mean_data(self.sadFeatureVector)
+        self.smilCovMatrix = self.zero_mean_data(self.smileFeatureVector)
+        self.sadCovMatrix = self.covariance(self.sadCovMatrix)
+        self.smilCovMatrix = self.covariance(self.smilCovMatrix)
 
-    # now we have max 150 eiginvector
-        eig_vals, eig_vecs = np.linalg.eig(cov_matrix)
+        print(self.sadCovMatrix.shape)
+        print(self.smilCovMatrix.shape)
 
-    # project data on vector to get weight matrix choose only 50 vector
-        adjusted_data = data.T * eig_vecs
+    # #   now we have max 150 eiginvector
+    #     eig_vals, eig_vecs = np.linalg.eig(cov_matrix)
+    #
+    # #   project data on vector to get weight matrix choose only 50 vector
+    #     adjusted_data = data.T * eig_vecs
+    #
+    # #   get new vector and compare with old vectors with ssd
+    #     new_vector = eig_vecs * new_data.T
+    #
+    # #   get normalized cross correlation
+    #     e = new_vector - adjusted_data
 
-    # get new vector and compare with old vectors with ssd
-        new_vector = eig_vecs * new_data.T
-
-    # get normalized cross correlation
-        e = new_vector - adjusted_data
-
-    # get ROC curve
+    #   get ROC curve
 
 
 if __name__ == '__main__':
     # run algorithm
     f = FaceRecognition('front_images_part1.csv')
-    x = np.array([[24, 24, -6, -6, -36], [0, 30, 0, 0, -30], [30, -30, 0, 30, -30]])
-    y = np.ma.cov(x)
-    print(y)
+    x = np.array([[24, 24, -6, -6, -36],
+                  [0, 30, 0, 0, -30],
+                  [30, -30, 0, 30, -30]])
+
+    # cv2.namedWindow("sd", cv2.WINDOW_NORMAL)
+    # cv2.imshow("sd", img)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+
+    # print(np.ma.cov(x.T))
+    # z = FaceRecognition.zero_mean_data(x)
+    # z = FaceRecognition.covariance(z)
+    # print(z)
