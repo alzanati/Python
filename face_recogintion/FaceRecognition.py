@@ -118,13 +118,17 @@ class FaceRecognition:
         print(self.eigValsSad[self.weight > 1.3])
         self.weight = self.weight > 1.3         # get boolean indexing to access vectors
         print(self.weight)
+        self.eigVecsSad = self.eigVecsSad[self.weight]
+        print(self.eigVecsSad)
 
         self.eigValsSmile, self.eigVecsSmile = np.linalg.eig(self.smilCovMatrix)
         self.weight = (self.eigValsSmile / self.eigValsSmile.max()) * 100
         print(self.eigValsSmile[self.weight > 1.3])
         self.weight = self.weight > 1.3         # get boolean indexing to access vectors
         print(self.weight)
-    #
+        self.eigVecsSmile = self.eigVecsSmile[self.weight]
+        print(self.eigVecsSmile)
+
     # #   project data on vector to get weight matrix choose only 50 vector
     #     adjusted_data = data.T * eig_vecs
     #
