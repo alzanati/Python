@@ -137,7 +137,7 @@ class FaceRecognition:
         self.eigVecsSad = self.eigVecsSad / np.linalg.norm(self.eigVecsSad)
         self.weight = (self.eigValsSad / self.eigValsSad.sum()) * 100
 
-        self.weight = self.weight > 1.3  # get boolean indexing to access vectors
+        self.weight = self.weight > 1.3
         self.eigVecsSad = self.eigVecsSad[self.weight]
         print('sad eig vectors: ', self.eigVecsSad.shape)
 
@@ -150,24 +150,29 @@ class FaceRecognition:
         print('smile eig vectors: ', self.eigVecsSmile.shape)
 
         #   project data on vector to get weight matrix of sads and smiles to get eigin faces
-        self.sadWeightMatrix = np.dot(self.eigVecsSad, self.normalizedSad.T)
-        print('weight matrix of sads: ', self.sadWeightMatrix.shape)
+        self.sadProjectionMatrix = np.dot(self.eigVecsSad, self.normalizedSad.T)
+        print('projection matrix of sads: ', self.sadProjectionMatrix.shape)
 
-        self.smileWeightMatrix = np.dot(self.eigVecsSmile, self.normalizedSmile.T)
-        print('weight matrix of smiles: ', self.smileWeightMatrix.shape)
+        self.smileProjectionMatrix = np.dot(self.eigVecsSmile, self.normalizedSmile.T)
+        print('projection matrix of smiles: ', self.smileProjectionMatrix.shape)
 
-        tmm = self.smileWeightMatrix[0]
-        tmm = tmm.reshape(360, 260)
-        cv2.imshow('img', tmm)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        self.sadWeightMatrix = np.dot(self.normalizedSad.T, self.sadProjectionMatrix.T)
+        print('sad weight matrix: ', self.sadWeightMatrix.shape)
+
+        self.smileWeightMatrix = np.dot(self.normalizedSmile.T, self.smileProjectionMatrix.T)
+        print('smile weight matrix: ', self.smileWeightMatrix.shape)
 
         #   get new vector and compare with old vectors with ssd
         #   by multiply with each eigin face after substract mean image
-        new_image = cv2.imread('/home/mohamed/workspace/Python/dataSets/front_images_part1/30b.jpg')
-        new_image = cv2.cvtColor(new_image, cv2.COLOR_BGR2GRAY)
-        new_image = new_image.reshape(-1, 1)
-        print(new_image.shape)
+        newImage = cv2.imread('/home/mohamed/workspace/Python/dataSets/front_images_part1/30b.jpg')
+        newImage = cv2.cvtColor(newImage, cv2.COLOR_BGR2GRAY)
+        newImage = newImage.reshape(-1, 1)
+
+        projectedSadImage = np.dot(self.sadProjectionMatrix, newImage)
+        projectedSmileImage = np.dot(self.smileProjectionMatrix, newImage)
+        print('sad projected matrix: ', projectedSadImage.shape)
+        print('smile projected matrix: ', projectedSmileImage.shape)
+
 
         #   now the idea we project new image to new space of eigin faces so we need
         #   to compare it with all images in datasets to get minimum distance
