@@ -146,7 +146,7 @@ class FaceRecognition:
         print('sad eig vectors: ', self.eigVecsSad.shape)
 
         self.eigValsSmile, self.eigVecsSmile = np.linalg.eig(self.smilCovMatrix)
-        self.eigVecsSmile /= np.linalg.norm(self.eigVecsSmile)
+        self.eigVecsSmile = self.eigVecsSmile / np.linalg.norm(self.eigVecsSmile)
         self.weight = (self.eigValsSmile / self.eigValsSmile.sum()) * 100
 
         self.weight = self.weight > 0.64
@@ -155,30 +155,16 @@ class FaceRecognition:
 
         #   project data on vector to get weight matrix of sads and smiles to get eigin faces
         self.sadProjectionMatrix = np.dot(self.eigVecsSad, self.normalizedSad.T)
-        print('projection matrix of sads(coefficients): ', self.sadProjectionMatrix.shape)
+        print('projection matrix of sads: ', self.sadProjectionMatrix.shape)
 
         self.smileProjectionMatrix = np.dot(self.eigVecsSmile, self.normalizedSmile.T)
-        print('projection matrix of smiles(coefficients): ', self.smileProjectionMatrix.shape)
+        print('projection matrix of smiles: ', self.smileProjectionMatrix.shape)
 
         self.sadWeightMatrix = np.dot(self.normalizedSad.T, self.sadProjectionMatrix.T)
         print('sad weight matrix: ', self.sadWeightMatrix.shape)
 
         self.smileWeightMatrix = np.dot(self.normalizedSmile.T, self.smileProjectionMatrix.T)
         print('smile weight matrix: ', self.smileWeightMatrix.shape)
-
-        coeff1 = self.smileWeightMatrix[0].reshape(-1, 1)
-        vec1 = self.smileProjectionMatrix[0].reshape(-1, 1)
-        eig_face = np.dot(vec1, coeff1.T)
-        gg = 0.0
-        for i in range(eig_face.shape[1]):
-            gg += eig_face[:, 1]
-        gg = gg.reshape(-1, 1)
-        gg = -(gg / np.max(gg)) * 255
-        gg = np.int32(gg)
-        img = gg.reshape(self.width, self.height)
-        cv2.imshow('img', img)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
 
         #   get new vector and compare with old vectors with ssd
         #   by multiply with each eigin face after substract mean image
