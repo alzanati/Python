@@ -10,23 +10,22 @@ from scipy import signal as sg
 
 class FaceRecognition:
     def __init__(self, csvFile):
-        self.smileFeatureVector = []  # list to hold smild image vectors
-        self.sadFeatureVector = []  # list to hold sad image vectors
-        self.smilePaths = []  # smile faces paths
-        self.sadPaths = []  # sad faces paths
-        self.dataPaths = []  #
-        self.absPaths = []  # absolute paths without ";"
-        self.normalizedSad = np.array(0)  # store zero mean data
+        self.smileFeatureVector = []    # list to hold smild image vectors
+        self.sadFeatureVector = []      # list to hold sad image vectors
+        self.smilePaths = []            # smile faces paths
+        self.sadPaths = []              # sad faces paths
+        self.dataPaths = []
+        self.absPaths = []                  # absolute paths without ";"
+        self.normalizedSad = np.array(0)    # store zero mean data
         self.normalizedSmile = np.array(0)  # store zero mean data
-        self.absPath = csvFile  # absolute path for data sets
-        self.seekLength = 0  # data set count
-        self.testImagesCount = 49  # to get 76 smile and 76 sad
+        self.absPath = csvFile              # absolute path for data sets
+        self.seekLength = 0         # data set count
+        self.testImagesCount = 49   # to get 76 smile and 76 sad
 
         self.load_data_from_csv()
         self.run()
 
     def load_data_from_csv(self):
-
         #   load all data sets paths from csv file
         csvFile = open(self.absPath, 'r')
         self.seekLength = self.get_seek_length(absPath=self.absPath)
@@ -43,7 +42,7 @@ class FaceRecognition:
             elif tmpChar == 'a':
                 self.sadPaths.append(tmpStr)
 
-        # read smile images and convert them to (m x n) x 1 vector, and add it to list
+        #   read smile images and convert them to (m x n) x 1 vector, and add it to list
         for i in range(len(self.smilePaths)):
             img = cv2.imread(self.smilePaths[i])
             img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -125,7 +124,6 @@ class FaceRecognition:
         # calculate cov matrix
         self.normalizedSad = self.zero_mean_data(self.sadFeatureVector)
         self.normalizedSmile = self.zero_mean_data(self.smileFeatureVector)
-
         print('normalized smile shape: ', self.normalizedSmile.shape)
         print('normalized sad shape: ', self.normalizedSad.shape)
 
@@ -136,15 +134,18 @@ class FaceRecognition:
 
         # now we have max 75 eiginvector for each category
         self.eigValsSad, self.eigVecsSad = np.linalg.eig(self.sadCovMatrix)
-        self.weight = (self.eigValsSad / self.eigValsSad.max()) * 100
-        # print(self.eigValsSad[self.weight > 1.3])
+        self.eigVecsSad = self.eigVecsSad / np.linalg.norm(self.eigVecsSad)
+        self.weight = (self.eigValsSad / self.eigValsSad.sum()) * 100
+
         self.weight = self.weight > 1.3  # get boolean indexing to access vectors
         self.eigVecsSad = self.eigVecsSad[self.weight]
         print('sad eig vectors: ', self.eigVecsSad.shape)
 
         self.eigValsSmile, self.eigVecsSmile = np.linalg.eig(self.smilCovMatrix)
-        self.weight = (self.eigValsSmile / self.eigValsSmile.max()) * 100
-        self.weight = self.weight > 1.3  # get boolean indexing to access vectors
+        self.eigVecsSmile = self.eigVecsSmile / np.linalg.norm(self.eigVecsSmile)
+        self.weight = (self.eigValsSmile / self.eigValsSmile.sum()) * 100
+
+        self.weight = self.weight > 1.3
         self.eigVecsSmile = self.eigVecsSmile[self.weight]
         print('smile eig vectors: ', self.eigVecsSmile.shape)
 
@@ -154,6 +155,12 @@ class FaceRecognition:
 
         self.smileWeightMatrix = np.dot(self.eigVecsSmile, self.normalizedSmile.T)
         print('weight matrix of smiles: ', self.smileWeightMatrix.shape)
+
+        tmm = self.smileWeightMatrix[0]
+        tmm = tmm.reshape(360, 260)
+        cv2.imshow('img', tmm)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
         #   get new vector and compare with old vectors with ssd
         #   by multiply with each eigin face after substract mean image
