@@ -21,6 +21,8 @@ class FaceRecognition:
         self.absPath = csvFile              # absolute path for data sets
         self.seekLength = 0         # data set count
         self.testImagesCount = 49   # to get 76 smile and 76 sad
+        self.sadList = []
+        self.smileList = []
 
         self.load_data_from_csv()
         self.run()
@@ -173,6 +175,8 @@ class FaceRecognition:
         print('sad projected matrix: ', projectedSadImage.shape)
         print('smile projected matrix: ', projectedSmileImage.shape)
 
+        # for i in range(len(self.smilCovMatrix)):
+        #     sd = self.smileWeightMatrix
 
         #   now the idea we project new image to new space of eigin faces so we need
         #   to compare it with all images in datasets to get minimum distance

@@ -63,8 +63,8 @@
       <file leaf-file-name="FaceRecognition.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/FaceRecognition.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="312">
-              <caret line="175" column="8" selection-start-line="175" selection-start-column="8" selection-end-line="175" selection-end-column="8" />
+            <state relative-caret-position="99">
+              <caret line="177" column="8" selection-start-line="177" selection-start-column="10" selection-end-line="178" selection-end-column="41" />
               <folding>
                 <element signature="e#58#68#0" expanded="true" />
               </folding>
@@ -456,7 +456,14 @@
       <option name="project" value="LOCAL" />
       <updated>1464531769305</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="compute weighted matrix">
+      <created>1464535654224</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1464535654224</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -501,7 +508,8 @@
     <MESSAGE value="get eigin faces" />
     <MESSAGE value="last stone in algorithm" />
     <MESSAGE value="show eigin face" />
-    <option name="LAST_COMMIT_MESSAGE" value="show eigin face" />
+    <MESSAGE value="compute weighted matrix" />
+    <option name="LAST_COMMIT_MESSAGE" value="compute weighted matrix" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -533,7 +541,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/FaceRecognition.py</url>
-          <line>97</line>
+          <line>99</line>
           <option name="timeStamp" value="99" />
         </line-breakpoint>
       </breakpoints>
@@ -767,8 +775,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/FaceRecognition.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="312">
-          <caret line="175" column="8" selection-start-line="175" selection-start-column="8" selection-end-line="175" selection-end-column="8" />
+        <state relative-caret-position="99">
+          <caret line="177" column="8" selection-start-line="177" selection-start-column="10" selection-end-line="178" selection-end-column="41" />
           <folding>
             <element signature="e#58#68#0" expanded="true" />
           </folding>
