@@ -166,22 +166,39 @@ class FaceRecognition:
 
         #   get new vector and compare with old vectors with ssd
         #   by multiply with each eigin face after substract mean image
-        newImage = cv2.imread('/home/mohamed/workspace/Python/dataSets/front_images_part1/30b.jpg')
+        newImage = cv2.imread('/home/mohamed/workspace/Python/dataSets/front_images_part1/88b.jpg')
         newImage = cv2.cvtColor(newImage, cv2.COLOR_BGR2GRAY)
         newImage = newImage.reshape(-1, 1)
 
         projectedSadImage = np.dot(self.sadProjectionMatrix, newImage)
         projectedSmileImage = np.dot(self.smileProjectionMatrix, newImage)
-        print('sad projected matrix: ', projectedSadImage.shape)
-        print('smile projected matrix: ', projectedSmileImage.shape)
+        print('sad_image projected matrix: ', projectedSadImage.shape)
+        print('smile_image projected matrix: ', projectedSmileImage.shape)
 
-        # for i in range(len(self.smilCovMatrix)):
-        #     sd = self.smileWeightMatrix
+        for i in range(self.smileWeightMatrix.shape[0]):
+            sd = self.smileWeightMatrix[i].reshape(-1, 1)
+            projectedSmileImage = projectedSmileImage.reshape(-1, 1)
+            sd = (sd - projectedSmileImage)**2
+            sd = np.sqrt(sd.sum())
+            self.smileList.append(sd)
 
-        #   now the idea we project new image to new space of eigin faces so we need
-        #   to compare it with all images in datasets to get minimum distance
-        #   so in our case we don't to compare to all datasets just on image sad, smile
-        #   or just compare to mean image in every category
+        for i in range(self.sadWeightMatrix.shape[0]):
+            sd = self.sadWeightMatrix[i].reshape(-1, 1)
+            projectedSadImage = projectedSadImage.reshape(-1, 1)
+            sd = (sd - projectedSadImage) ** 2
+            sd = np.sqrt(sd.sum())
+            self.sadList.append(sd)
+
+        ssdb = np.asarray(self.smileList)
+        ssdb = ssdb.sum() / ssdb.max()
+
+        ssda = np.asarray(self.sadList)
+        ssda = ssda.sum() / ssda.max()
+
+        if ssdb < ssda:
+            print('smile')
+        elif ssdb > ssda:
+            print('sad')
 
         #   get ROC curve
 
