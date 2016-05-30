@@ -20,7 +20,7 @@ class FaceRecognition:
         self.normalizedSmile = np.array(0)  # store zero mean data
         self.absPath = csvFile              # absolute path for data sets
         self.seekLength = 0         # data set count
-        self.testImagesCount = 49   # to get 76 smile and 76 sad
+        self.testImagesCount = 50   # to get 76 smile and 76 sad
         self.sadList = []
         self.smileList = []
 
@@ -34,6 +34,8 @@ class FaceRecognition:
         for i in range(self.seekLength):
             self.dataPaths.append(csvFile.readline())
         self.absPaths = self.get_abs_paths()
+        self.absPaths = sorted(self.absPaths)
+        print(self.absPaths)
 
         #   divide data sets into smile and sad according to data set "b" represent smile
         for i in range(len(self.absPaths) - self.testImagesCount):
@@ -126,8 +128,11 @@ class FaceRecognition:
         self.smileMeanImage = self.get_mean_image(self.smileFeatureVector)
 
         # calculate cov matrix
-        self.normalizedSad = self.zero_mean_data(self.sadFeatureVector)
-        self.normalizedSmile = self.zero_mean_data(self.smileFeatureVector)
+        # self.normalizedSad = self.zero_mean_data(self.sadFeatureVector)
+        # self.normalizedSmile = self.zero_mean_data(self.smileFeatureVector)
+        self.normalizedSad = self.sadFeatureVector - self.sadMeanImage.reshape(-1, 1)
+        self.normalizedSmile = self.smileFeatureVector - self.smileMeanImage.reshape(-1, 1)
+
         print('normalized smile shape: ', self.normalizedSmile.shape)
         print('normalized sad shape: ', self.normalizedSad.shape)
 
@@ -138,27 +143,35 @@ class FaceRecognition:
 
         # now we have max 75 eiginvector for each category
         self.eigValsSad, self.eigVecsSad = np.linalg.eig(self.sadCovMatrix)
-        self.eigVecsSad = self.eigVecsSad / np.linalg.norm(self.eigVecsSad)
+        self.eigVecsSadNorm = []
+        for i in range(len(self.eigVecsSad)):
+            tmp = self.eigVecsSad[i] / np.linalg.norm(self.eigVecsSad[i])
+            self.eigVecsSadNorm.append(tmp)
+        self.eigVecsSad = np.asarray(self.eigVecsSadNorm)
         self.weight = (self.eigValsSad / self.eigValsSad.sum()) * 100
 
-        self.weight = self.weight > 0.55
+        self.weight = self.weight > 1
         self.eigVecsSad = self.eigVecsSad[self.weight]
         print('sad eig vectors: ', self.eigVecsSad.shape)
 
         self.eigValsSmile, self.eigVecsSmile = np.linalg.eig(self.smilCovMatrix)
-        self.eigVecsSmile /= np.linalg.norm(self.eigVecsSmile)
+        self.eigVecsSmileNorm = []
+        for i in range(len(self.eigVecsSad)):
+            tmp = self.eigVecsSmile[i] / np.linalg.norm(self.eigVecsSmile[i])
+            self.eigVecsSmileNorm.append(tmp)
+        self.eigVecsSmile = np.asarray(self.eigVecsSmileNorm)
         self.weight = (self.eigValsSmile / self.eigValsSmile.sum()) * 100
 
-        self.weight = self.weight > 0.64
+        self.weight = self.weight > 1
         self.eigVecsSmile = self.eigVecsSmile[self.weight]
         print('smile eig vectors: ', self.eigVecsSmile.shape)
 
         #   project data on vector to get weight matrix of sads and smiles to get eigin faces
         self.sadProjectionMatrix = np.dot(self.eigVecsSad, self.normalizedSad.T)
-        print('projection matrix of sads(coefficients): ', self.sadProjectionMatrix.shape)
+        print('projection matrix of sads(eign_faces): ', self.sadProjectionMatrix.shape)
 
         self.smileProjectionMatrix = np.dot(self.eigVecsSmile, self.normalizedSmile.T)
-        print('projection matrix of smiles(coefficients): ', self.smileProjectionMatrix.shape)
+        print('projection matrix of smiles(eign_faces): ', self.smileProjectionMatrix.shape)
 
         self.sadWeightMatrix = np.dot(self.normalizedSad.T, self.sadProjectionMatrix.T)
         print('sad weight matrix: ', self.sadWeightMatrix.shape)
@@ -166,23 +179,9 @@ class FaceRecognition:
         self.smileWeightMatrix = np.dot(self.normalizedSmile.T, self.smileProjectionMatrix.T)
         print('smile weight matrix: ', self.smileWeightMatrix.shape)
 
-        coeff1 = self.smileWeightMatrix[0].reshape(-1, 1)
-        vec1 = self.smileProjectionMatrix[0].reshape(-1, 1)
-        eig_face = np.dot(vec1, coeff1.T)
-        gg = 0.0
-        for i in range(eig_face.shape[1]):
-            gg += eig_face[:, 1]
-        gg = gg.reshape(-1, 1)
-        gg = -(gg / np.max(gg)) * 255
-        gg = np.int32(gg)
-        img = gg.reshape(self.width, self.height)
-        cv2.imshow('img', img)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
         #   get new vector and compare with old vectors with ssd
         #   by multiply with each eigin face after substract mean image
-        newImage = cv2.imread('/home/mohamed/workspace/Python/dataSets/front_images_part1/17b.jpg')
+        newImage = cv2.imread('/home/mohamed/workspace/Python/dataSets/front_images_part1/86b.jpg')
         newImage = cv2.cvtColor(newImage, cv2.COLOR_BGR2GRAY)
         newImage = newImage.reshape(-1, 1)
 
@@ -209,15 +208,24 @@ class FaceRecognition:
             self.sadList.append(sd)
 
         ssdb = np.asarray(self.smileList)
-        ssdb = ssdb.sum()
+        ssdb = ssdb.sum() / ssdb.max()
 
         ssda = np.asarray(self.sadList)
-        ssda = ssda.sum()
+        ssda = ssda.sum() / ssda.max()
 
         if ssdb < ssda:
-            print('smile')
+            img = cv2.imread('smilee.jpg')
+            cv2.namedWindow('smile', cv2.WINDOW_NORMAL)
+            cv2.imshow('smile', img)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+
         elif ssdb > ssda:
-            print('sad')
+            img = cv2.imread('sadd.jpg')
+            cv2.namedWindow('sad', cv2.WINDOW_NORMAL)
+            cv2.imshow('sad', img)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
 
         #   get ROC curve
 
