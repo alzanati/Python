@@ -112,7 +112,7 @@ class FaceRecognition(FacePCA):
             tmp = self.eigVecsSmile[i] / np.linalg.norm(self.eigVecsSmile[i])
             self.eigVecsSmileNorm.append(tmp)
         self.eigVecsSmile = np.asarray(self.eigVecsSmileNorm)
-        self.weight1 = (self.eigValsSmile / self.eigValsSmile.sum()) * 100
+        self.weight = (self.eigValsSmile / self.eigValsSmile.sum()) * 100
 
         self.weight = self.weight > 1.0
         self.eigVecsSmile = self.eigVecsSmile[self.weight]
@@ -128,12 +128,6 @@ class FaceRecognition(FacePCA):
 
     def __calculate_kth_coefficient(self):
         #   project data on vector to get weight matrix of sads and smiles to get eigin faces
-        self.sadProjectionMatrix = np.dot(self.eigVecsSad, self.normalizedSad.T)
-        print('projection matrix of sads(eign_faces): ', self.sadProjectionMatrix.shape)
-
-        self.smileProjectionMatrix = np.dot(self.eigVecsSmile, self.normalizedSmile.T)
-        print('projection matrix of smiles(eign_faces): ', self.smileProjectionMatrix.shape)
-
         self.sadWeightMatrix = np.dot(self.normalizedSad.T, self.sadProjectionMatrix.T)
         print('sad weight matrix: ', self.sadWeightMatrix.shape)
 
@@ -145,6 +139,8 @@ class FaceRecognition(FacePCA):
         self.__calculate_cov()
 
         self.__calculate_eignvectors()
+
+        self.__calculate_eigfaces()
 
         self.__calculate_kth_coefficient()
 

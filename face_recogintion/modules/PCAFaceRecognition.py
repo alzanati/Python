@@ -9,136 +9,94 @@ from modules.AbstractRecogntion import FacePCA
 
 
 class FaceRecognition(FacePCA):
-    def __init__(self, csvFile):
-        self.smileFeatureVector = []    # list to hold smild image vectors
-        self.sadFeatureVector = []      # list to hold sad image vectors
-        self.smilePaths = []            # smile faces paths
-        self.sadPaths = []              # sad faces paths
+    def __init__(self, csvFile, count):
+        self.absPath = csvFile
+        self.featureVector = []    # list to hold smild image vectors
+        self.imageCount = count
         self.dataPaths = []
-        self.absPaths = []                  # absolute paths without ";"
-        self.normalizedSad = np.array(0)    # store zero mean data
-        self.normalizedSmile = np.array(0)  # store zero mean data
-        self.absPath = csvFile              # absolute path for data sets
-        self.seekLength = 0         # data set count
-        self.testImagesCount = 50   # to get 76 smile and 76 sad
-        self.sadList = []
-        self.smileList = []
+        self.trainingList = []
+        self.testList = []
+        self.ecuDis = []
+        self.indecies = np.array(0)
 
         self.load_data_from_csv()
         self.__run()
+        self.test()
 
     def load_data_from_csv(self):
         #   load all data sets paths from csv file
         csvFile = open(self.absPath, 'r')
-        self.seekLength = self.get_seek_length(absPath=self.absPath)
+        self.seekLength = self.imageCount
         for i in range(self.seekLength):
             self.dataPaths.append(csvFile.readline())
         self.absPaths = self.get_abs_paths(self.dataPaths)
-        self.absPaths = sorted(self.absPaths)
 
         #   get width & height
         img = cv2.imread(self.absPaths[i])
         self.width  = img.shape[0]
         self.height = img.shape[1]
 
-        #   divide data sets into smile and sad according to data set "b" represent smile
-        for i in range(len(self.absPaths) - self.testImagesCount):
+        #   divide data sets into training(2) and test (1)
+        for i in range(self.imageCount):
             tmpStr = self.absPaths[i]
-            tmpChar = tmpStr[-5]
-            if tmpChar == 'b':
-                self.smilePaths.append(tmpStr)
-            elif tmpChar == 'a':
-                self.sadPaths.append(tmpStr)
+            tmpChar = tmpStr[-6:-4]
+            if str(tmpChar) == str(11):
+                self.trainingList.append(tmpStr)
+            elif str(tmpChar) == str(12):
+                self.trainingList.append(tmpStr)
+            elif str(tmpChar) == str(13):
+                self.testList.append(tmpStr)
 
-        #   read smile images and convert them to (m x n) x 1 vector, and add it to list
-        for i in range(len(self.smilePaths)):
-            img = cv2.imread(self.smilePaths[i])
+        print(len(self.testList))
+        #   read training images and convert them to (m x n) x 1 vector, and add it to list
+        for i in range(len(self.trainingList)):
+            img = cv2.imread(self.trainingList[i])
             img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             img = img.reshape(-1, 1)
-            self.smileFeatureVector.append(img)
-        self.smileFeatureVector = np.asarray(self.smileFeatureVector)
-        self.smileFeatureVector = self.smileFeatureVector.T[0]
-        print('smiles feature vector: \n', self.smileFeatureVector.shape)
-
-        #   read sad images and convert them to (m x n) x 1 vector, and add it to list
-        for i in range(len(self.sadPaths)):
-            img = cv2.imread(self.sadPaths[i])
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            img = img.reshape(-1, 1)
-            self.sadFeatureVector.append(img)
-        self.sadFeatureVector = np.asarray(self.sadFeatureVector)
-        self.sadFeatureVector = self.sadFeatureVector.T[0]
-        print('sads feature vector: \n', self.sadFeatureVector.shape)
+            self.featureVector.append(img)
+        self.featureVector = np.asarray(self.featureVector)
+        self.featureVector = self.featureVector.T[0]                # column vector
+        print('feature vector: \n', self.featureVector.shape)
 
         self.absPaths.clear()
         self.dataPaths.clear()
-        self.sadPaths.clear()
-        self.smilePaths.clear()
 
     def __calculate_cov(self):
         #   get mean image of each category
-        self.sadMeanImage = self.get_mean_image(self.sadFeatureVector,
-                                                self.width, self.height)
-        self.smileMeanImage = self.get_mean_image(self.smileFeatureVector,
-                                                  self.width, self.height)
-        # calculate cov matrix
-        self.normalizedSad = self.sadFeatureVector - self.sadMeanImage.reshape(-1, 1)
-        self.normalizedSmile = self.smileFeatureVector - self.smileMeanImage.reshape(-1, 1)
-        print('normalized smile shape: ', self.normalizedSmile.shape)
-        print('normalized sad shape: ', self.normalizedSad.shape)
+        self.meanImage = self.get_mean_image(self.featureVector, self.width, self.height)
 
-        self.sadCovMatrix = self.covariance(self.normalizedSad)
-        self.smilCovMatrix = self.covariance(self.normalizedSmile)
-        print('sad cov matrix shape: ', self.sadCovMatrix.shape)
-        print('smile cov matrix shape: ', self.smilCovMatrix.shape)
+        # calculate cov matrix
+        self.normalizedData = self.featureVector - (self.meanImage.reshape(-1, 1))
+        print('normalized data shape: ', self.normalizedData.shape)
+
+        self.covMatrix = self.covariance(self.normalizedData)
+        print('cov matrix shape: ', self.covMatrix.shape)
 
     def __calculate_eignvectors(self):
-        # now we have max 75 eiginvector for each category
-        self.eigValsSad, self.eigVecsSad = np.linalg.eig(self.sadCovMatrix)
-        self.eigVecsSadNorm = []
-        for i in range(len(self.eigVecsSad)):
-            tmp = self.eigVecsSad[i] / np.linalg.norm(self.eigVecsSad[i])
-            self.eigVecsSadNorm.append(tmp)
-        self.eigVecsSad = np.asarray(self.eigVecsSadNorm)
-        self.weight = (self.eigValsSad / self.eigValsSad.sum()) * 100
+        # now we have max 200 eiginvector for each category
+        self.eigVals, self.eigVecs = np.linalg.eig(self.covMatrix)
+        self.eigVecsNorm = []
+
+        for i in range(len(self.eigVecs)):
+            tmp = self.eigVecs[i] / np.linalg.norm(self.eigVecs[i])
+            self.eigVecsNorm.append(tmp)
+
+        self.eigVecsSad = np.asarray(self.eigVecsNorm)
+        self.weight = (self.eigVals / self.eigVals.sum()) * 100
 
         self.weight = self.weight > 1.0
-        self.eigVecsSad = self.eigVecsSad[self.weight]
-        print('sad eig vectors: ', self.eigVecsSad.shape)
-
-        self.eigValsSmile, self.eigVecsSmile = np.linalg.eig(self.smilCovMatrix)
-        self.eigVecsSmileNorm = []
-        for i in range(len(self.eigVecsSad)):
-            tmp = self.eigVecsSmile[i] / np.linalg.norm(self.eigVecsSmile[i])
-            self.eigVecsSmileNorm.append(tmp)
-        self.eigVecsSmile = np.asarray(self.eigVecsSmileNorm)
-        self.weight1 = (self.eigValsSmile / self.eigValsSmile.sum()) * 100
-
-        self.weight = self.weight > 1.0
-        self.eigVecsSmile = self.eigVecsSmile[self.weight]
-        print('smile eig vectors: ', self.eigVecsSmile.shape)
+        self.eigVecs = self.eigVecs[self.weight]
+        print('eig vectors shape: ', self.eigVecs.shape)
 
     def __calculate_eigfaces(self):
         #   project data on vector to get weight matrix of sads and smiles to get eigin faces
-        self.sadProjectionMatrix = np.dot(self.eigVecsSad, self.normalizedSad.T)
-        print('projection matrix of sads(eign_faces): ', self.sadProjectionMatrix.shape)
-
-        self.smileProjectionMatrix = np.dot(self.eigVecsSmile, self.normalizedSmile.T)
-        print('projection matrix of smiles(eign_faces): ', self.smileProjectionMatrix.shape)
+        self.projectionMatrix = np.dot(self.eigVecs, self.normalizedData.T)
+        print('projection matrix(eignfaces): ', self.projectionMatrix.shape)
 
     def __calculate_kth_coefficient(self):
         #   project data on vector to get weight matrix of sads and smiles to get eigin faces
-        self.sadProjectionMatrix = np.dot(self.eigVecsSad, self.normalizedSad.T)
-        print('projection matrix of sads(eign_faces): ', self.sadProjectionMatrix.shape)
-
-        self.smileProjectionMatrix = np.dot(self.eigVecsSmile, self.normalizedSmile.T)
-        print('projection matrix of smiles(eign_faces): ', self.smileProjectionMatrix.shape)
-
-        self.sadWeightMatrix = np.dot(self.normalizedSad.T, self.sadProjectionMatrix.T)
-        print('sad weight matrix: ', self.sadWeightMatrix.shape)
-
-        self.smileWeightMatrix = np.dot(self.normalizedSmile.T, self.smileProjectionMatrix.T)
-        print('smile weight matrix: ', self.smileWeightMatrix.shape)
+        self.weightMatrix = np.dot(self.normalizedData.T, self.projectionMatrix.T)
+        print('sad weight matrix: ', self.weightMatrix .shape)
 
     def __run(self):
         #   run algorithm
@@ -146,51 +104,30 @@ class FaceRecognition(FacePCA):
 
         self.__calculate_eignvectors()
 
+        self.__calculate_eigfaces()
+
         self.__calculate_kth_coefficient()
 
-    def test(self, testImag):
-        self.testImage = cv2.imread(testImag)
-        self.testImage = cv2.cvtColor(self.testImage, cv2.COLOR_BGR2GRAY)
-        self.testImage = self.testImage.reshape(-1, 1)
+    def test(self):
+        for path in self.testList:
+            testImage = cv2.imread(path)
+            testImage = cv2.cvtColor(testImage, cv2.COLOR_BGR2GRAY)
+            testImage = testImage.reshape(-1, 1)
+            newImage = testImage - self.meanImage.reshape(-1, 1)
 
-        newImage_sad = self.testImage - self.sadMeanImage.reshape(-1, 1)
-        newImage_smile = self.testImage - self.smileMeanImage.reshape(-1, 1)
+            projectedImage = np.dot(self.projectionMatrix, newImage)
+            tmpDis = self.__compare_show(projectedImage)
+            self.ecuDis.append(np.argmin(tmpDis))
+        print(self.ecuDis)
 
-        self.projectedSadImage = np.dot(self.sadProjectionMatrix, newImage_sad)
-        self.projectedSmileImage = np.dot(self.smileProjectionMatrix, newImage_smile)
-        print('sad_image projected matrix: ', self.projectedSadImage.shape)
-        print('smile_image projected matrix: ', self.projectedSmileImage.shape)
-
-        self.__compare_show(self.projectedSmileImage, self.projectedSadImage)
-
-    def __compare_show(self, projectedSmileImage, projectedSadImage):
+    def __compare_show(self, projectedImage):
         #   get ssd of weight matrix and new image
-        ssdb = self.get_ssd(self.smileWeightMatrix.shape[0],
-                            self.smileWeightMatrix,
-                            projectedSmileImage)
+        ssdb = self.get_ssd(self.weightMatrix.shape[0],
+                            self.weightMatrix,
+                            projectedImage)
 
-        ssda = self.get_ssd(self.sadWeightMatrix.shape[0],
-                            self.sadWeightMatrix,
-                            projectedSadImage)
-        #   get feature
-        ssdb = ssdb.sum() / (ssdb.max() + ssda.max())
-        ssda = ssda.sum() / (ssdb.max() + ssda.max())
-
-        if ssdb < ssda:
-            img = cv2.imread('smilee.jpg')
-            cv2.namedWindow('smile', cv2.WINDOW_NORMAL)
-            cv2.imshow('smile', img)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-
-        elif ssdb > ssda:
-            img = cv2.imread('sadd.jpg')
-            cv2.namedWindow('sad', cv2.WINDOW_NORMAL)
-            cv2.imshow('sad', img)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
+        return ssdb
 
 if __name__ == '__main__':
     # run algorithm
-    f = FaceRecognition('front_images_part1.csv')
-    f.test('/home/mohamed/workspace/Python/dataSets/front_images_part1/86b.jpg')
+    f = FaceRecognition('originalimages_part1.csv', 1400)

@@ -65,7 +65,7 @@ class CreateCSV(QtGui.QWidget):
         for root, dirs, files in os.walk(self.path):
             for directory in dirs:
                 subject_path = os.path.join(root, directory)
-                for filename in os.listdir(subject_path):
+                for filename in sorted(os.listdir(subject_path)):
                     absPath = subject_path + "/" + filename
                     current_path = absPath + SEPARATOR
                     self.dataPaths.append(current_path)
@@ -84,6 +84,8 @@ class CreateCSV(QtGui.QWidget):
 
 
 if __name__ == "__main__":
+    '/media/mohamed/Data_Space/Courses/Face_work/originalimages_part1'
+    '/home/mohamed/workspace'
     app = QtGui.QApplication(sys.argv)
     ui = CreateCSV()
     sys.exit(app.exec())
