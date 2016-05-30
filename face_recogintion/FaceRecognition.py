@@ -148,7 +148,7 @@ class FaceRecognition:
         self.eigVecsSad = np.asarray(self.eigVecsSadNorm)
         self.weight = (self.eigValsSad / self.eigValsSad.sum()) * 100
 
-        self.weight = self.weight > 1
+        self.weight = self.weight > 1.0
         self.eigVecsSad = self.eigVecsSad[self.weight]
         print('sad eig vectors: ', self.eigVecsSad.shape)
 
@@ -158,9 +158,9 @@ class FaceRecognition:
             tmp = self.eigVecsSmile[i] / np.linalg.norm(self.eigVecsSmile[i])
             self.eigVecsSmileNorm.append(tmp)
         self.eigVecsSmile = np.asarray(self.eigVecsSmileNorm)
-        self.weight = (self.eigValsSmile / self.eigValsSmile.sum()) * 100
+        self.weight1 = (self.eigValsSmile / self.eigValsSmile.sum()) * 100
 
-        self.weight = self.weight > 1
+        self.weight = self.weight > 1.0
         self.eigVecsSmile = self.eigVecsSmile[self.weight]
         print('smile eig vectors: ', self.eigVecsSmile.shape)
 
@@ -194,10 +194,6 @@ class FaceRecognition:
 
         self.__calculate_kth_coefficient()
 
-
-
-        #   get ROC curve
-
     def test(self, testImag):
         self.testImage = cv2.imread(testImag)
         self.testImage = cv2.cvtColor(self.testImage, cv2.COLOR_BGR2GRAY)
@@ -214,25 +210,17 @@ class FaceRecognition:
         self.__compare_show(self.projectedSmileImage, self.projectedSadImage)
 
     def __compare_show(self, projectedSmileImage, projectedSadImage):
-        for i in range(self.smileWeightMatrix.shape[0]):
-            sd = self.smileWeightMatrix[i].reshape(-1, 1)
-            projectedSmileImage = projectedSmileImage.reshape(-1, 1)
-            sd = (sd - projectedSmileImage) ** 2
-            sd = np.sqrt(sd.sum())
-            self.smileList.append(sd)
+        ssdb = self.__get_ssd(self.smileWeightMatrix.shape[0],
+                              self.smileWeightMatrix,
+                              projectedSmileImage)
 
-        for i in range(self.sadWeightMatrix.shape[0]):
-            sd = self.sadWeightMatrix[i].reshape(-1, 1)
-            projectedSadImage = projectedSadImage.reshape(-1, 1)
-            sd = (sd - projectedSadImage) ** 2
-            sd = np.sqrt(sd.sum())
-            self.sadList.append(sd)
+        ssda = self.__get_ssd(self.sadWeightMatrix.shape[0],
+                              self.sadWeightMatrix,
+                              projectedSadImage)
 
-        ssdb = np.asarray(self.smileList)
-        ssdb = ssdb.sum() / ssdb.max()
+        ssdb = ssdb.sum() / (ssdb.max() + ssda.max())
+        ssda = ssda.sum() / (ssdb.max() + ssda.max())
 
-        ssda = np.asarray(self.sadList)
-        ssda = ssda.sum() / ssda.max()
 
         if ssdb < ssda:
             img = cv2.imread('smilee.jpg')
@@ -247,6 +235,16 @@ class FaceRecognition:
             cv2.imshow('sad', img)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
+
+    def __get_ssd(self, imageCounts, wieghtMatrix, projectedImage):
+        ssdList = []
+        for i in range(imageCounts):
+            sd = wieghtMatrix[i].reshape(-1, 1)
+            projectedImage = projectedImage.reshape(-1, 1)
+            sd = (sd - projectedImage) ** 2
+            sd = np.sqrt(sd.sum())
+            ssdList.append(sd)
+        return np.asarray(ssdList)
 
 if __name__ == '__main__':
     # run algorithm
