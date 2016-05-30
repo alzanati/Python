@@ -4,11 +4,10 @@
 
 import cv2
 import numpy as np
-from matplotlib import pylab as plt
-from scipy import signal as sg
+from AbstractRecogntion import FacePCA
 
 
-class FaceRecognition:
+class FaceRecognition(FacePCA):
     def __init__(self, csvFile):
         self.smileFeatureVector = []    # list to hold smild image vectors
         self.sadFeatureVector = []      # list to hold sad image vectors
@@ -33,9 +32,13 @@ class FaceRecognition:
         self.seekLength = self.get_seek_length(absPath=self.absPath)
         for i in range(self.seekLength):
             self.dataPaths.append(csvFile.readline())
-        self.absPaths = self.get_abs_paths()
+        self.absPaths = self.get_abs_paths(self.dataPaths)
         self.absPaths = sorted(self.absPaths)
-        print(self.absPaths)
+
+        #   get width & height
+        img = cv2.imread(self.absPaths[i])
+        self.width  = img.shape[0]
+        self.height = img.shape[1]
 
         #   divide data sets into smile and sad according to data set "b" represent smile
         for i in range(len(self.absPaths) - self.testImagesCount):
@@ -49,8 +52,6 @@ class FaceRecognition:
         #   read smile images and convert them to (m x n) x 1 vector, and add it to list
         for i in range(len(self.smilePaths)):
             img = cv2.imread(self.smilePaths[i])
-            self.width = img.shape[0]
-            self.height = img.shape[1]
             img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             img = img.reshape(-1, 1)
             self.smileFeatureVector.append(img)
@@ -73,63 +74,15 @@ class FaceRecognition:
         self.sadPaths.clear()
         self.smilePaths.clear()
 
-    #   get absolute path of images by parsing it to remove ";"
-    def get_abs_paths(self):
-        for i in range(len(self.dataPaths)):
-            strTmp = self.dataPaths[i]
-            strTmp = strTmp[:-2]
-            self.absPaths.append(strTmp)
-        return self.absPaths
-
-    #   get length of data sets ( count of images )
-    def get_seek_length(self, absPath):
-        csvFile = open(absPath, 'r')
-        seekLength = 0
-        while csvFile.readline():
-            seekLength += 1
-        return seekLength
-
-    #   calculate zero mean data
-    @staticmethod
-    def zero_mean_data(data):
-        n = data.shape[1]
-        zero_data = []
-        for i in range(n):
-            tmp = data[:, i]
-            zero_data.append(tmp - tmp.mean())
-        return np.array(zero_data).T
-
-    #   calculate covariance matrix
-    @staticmethod
-    def covariance(data):
-        divsor = len(data) - 1
-        tData = data.T
-        covMatrix = np.dot(tData, data)
-        covMatrix = np.divide(covMatrix, divsor)
-        return covMatrix
-
-    #   get mean image of category
-    def get_mean_image(self, data):
-        n = data.shape[1]
-        tmpMean = []
-        meanImage = []
-        for i in range(n):
-            tmpData = data[:, i]
-            tmpMean.append(tmpData.mean())
-        tmpMean = np.array(tmpMean).mean()
-        for i in range (self.width * self.height):
-            meanImage.append(tmpMean)
-        return np.array(meanImage, np.int32)
-
     def __calculate_cov(self):
         #   get mean image of each category
-        self.sadMeanImage = self.get_mean_image(self.sadFeatureVector)
-        self.smileMeanImage = self.get_mean_image(self.smileFeatureVector)
-
+        self.sadMeanImage = self.get_mean_image(self.sadFeatureVector,
+                                                self.width, self.height)
+        self.smileMeanImage = self.get_mean_image(self.smileFeatureVector,
+                                                  self.width, self.height)
         # calculate cov matrix
         self.normalizedSad = self.sadFeatureVector - self.sadMeanImage.reshape(-1, 1)
         self.normalizedSmile = self.smileFeatureVector - self.smileMeanImage.reshape(-1, 1)
-
         print('normalized smile shape: ', self.normalizedSmile.shape)
         print('normalized sad shape: ', self.normalizedSad.shape)
 
@@ -187,7 +140,7 @@ class FaceRecognition:
         print('smile weight matrix: ', self.smileWeightMatrix.shape)
 
     def __run(self):
-
+        #   run algorithm
         self.__calculate_cov()
 
         self.__calculate_eignvectors()
@@ -210,17 +163,17 @@ class FaceRecognition:
         self.__compare_show(self.projectedSmileImage, self.projectedSadImage)
 
     def __compare_show(self, projectedSmileImage, projectedSadImage):
-        ssdb = self.__get_ssd(self.smileWeightMatrix.shape[0],
-                              self.smileWeightMatrix,
-                              projectedSmileImage)
+        #   get ssd of weight matrix and new image
+        ssdb = self.get_ssd(self.smileWeightMatrix.shape[0],
+                            self.smileWeightMatrix,
+                            projectedSmileImage)
 
-        ssda = self.__get_ssd(self.sadWeightMatrix.shape[0],
-                              self.sadWeightMatrix,
-                              projectedSadImage)
-
+        ssda = self.get_ssd(self.sadWeightMatrix.shape[0],
+                            self.sadWeightMatrix,
+                            projectedSadImage)
+        #   get feature
         ssdb = ssdb.sum() / (ssdb.max() + ssda.max())
         ssda = ssda.sum() / (ssdb.max() + ssda.max())
-
 
         if ssdb < ssda:
             img = cv2.imread('smilee.jpg')
@@ -235,16 +188,6 @@ class FaceRecognition:
             cv2.imshow('sad', img)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
-
-    def __get_ssd(self, imageCounts, wieghtMatrix, projectedImage):
-        ssdList = []
-        for i in range(imageCounts):
-            sd = wieghtMatrix[i].reshape(-1, 1)
-            projectedImage = projectedImage.reshape(-1, 1)
-            sd = (sd - projectedImage) ** 2
-            sd = np.sqrt(sd.sum())
-            ssdList.append(sd)
-        return np.asarray(ssdList)
 
 if __name__ == '__main__':
     # run algorithm
