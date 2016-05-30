@@ -4,7 +4,8 @@
 
 import cv2
 import numpy as np
-from AbstractRecogntion import FacePCA
+
+from modules.AbstractRecogntion import FacePCA
 
 
 class FaceRecognition(FacePCA):
@@ -140,7 +141,7 @@ class FaceRecognition(FacePCA):
         print('smile weight matrix: ', self.smileWeightMatrix.shape)
 
     def __run(self):
-
+        #   run algorithm
         self.__calculate_cov()
 
         self.__calculate_eignvectors()
@@ -164,13 +165,13 @@ class FaceRecognition(FacePCA):
 
     def __compare_show(self, projectedSmileImage, projectedSadImage):
         #   get ssd of weight matrix and new image
-        ssdb = self.__get_ssd(self.smileWeightMatrix.shape[0],
-                              self.smileWeightMatrix,
-                              projectedSmileImage)
+        ssdb = self.get_ssd(self.smileWeightMatrix.shape[0],
+                            self.smileWeightMatrix,
+                            projectedSmileImage)
 
-        ssda = self.__get_ssd(self.sadWeightMatrix.shape[0],
-                              self.sadWeightMatrix,
-                              projectedSadImage)
+        ssda = self.get_ssd(self.sadWeightMatrix.shape[0],
+                            self.sadWeightMatrix,
+                            projectedSadImage)
         #   get feature
         ssdb = ssdb.sum() / (ssdb.max() + ssda.max())
         ssda = ssda.sum() / (ssdb.max() + ssda.max())

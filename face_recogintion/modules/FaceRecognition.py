@@ -4,7 +4,8 @@
 
 import cv2
 import numpy as np
-from AbstractRecogntion import FacePCA
+
+from modules.AbstractRecogntion import FacePCA
 
 
 class FaceRecognition(FacePCA):
