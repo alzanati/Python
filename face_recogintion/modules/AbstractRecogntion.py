@@ -60,15 +60,12 @@ class FacePCA(object):
         return np.array(meanImage, np.int32)
 
     @staticmethod
-    def get_ssd(imageCounts, wieghtMatrix, projectedImage, threshold):
+    def get_ssd(imageCounts, wieghtMatrix, projectedImage):
         ssdList = []
         projectedImage = projectedImage.reshape(-1, 1)
         for i in range(imageCounts):
             sd = wieghtMatrix[i].reshape(-1, 1)
             ssd = np.sum((sd - projectedImage)**2)
             ssd = np.sqrt(ssd)
-            if ssd >= threshold :
-                ssdList.append(1)
-            else:
-                ssdList.append(0)
+            ssdList.append(ssd)
         return ssdList
