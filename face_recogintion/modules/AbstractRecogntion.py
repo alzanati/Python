@@ -60,18 +60,15 @@ class FacePCA(object):
         return np.array(meanImage, np.int32)
 
     @staticmethod
-    def get_ssd(imageCounts, wieghtMatrix, projectedImage):
+    def get_ssd(imageCounts, wieghtMatrix, projectedImage, threshold):
         ssdList = []
+        projectedImage = projectedImage.reshape(-1, 1)
         for i in range(imageCounts):
             sd = wieghtMatrix[i].reshape(-1, 1)
-            projectedImage = projectedImage.reshape(-1, 1)
             ssd = np.sum((sd - projectedImage)**2)
-            ssdList.append(np.sqrt(ssd))
-        return np.asarray(ssdList)
-
-    @staticmethod
-    def sorted_nicely(l):
-        convert = lambda text: int(text) if text.isdigit() else text
-        alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
-        return sorted(l, key=alphanum_key)
-
+            ssd = np.sqrt(ssd)
+            if ssd >= threshold :
+                ssdList.append(1)
+            else:
+                ssdList.append(0)
+        return ssdList
