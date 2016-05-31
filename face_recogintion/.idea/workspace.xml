@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8e5b6d41-7808-482f-b860-15882fa46b65" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/modules/tests.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/AbstractRecogntion.py" afterPath="$PROJECT_DIR$/modules/AbstractRecogntion.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/PCAFaceRecognition.py" afterPath="$PROJECT_DIR$/modules/PCAFaceRecognition.py" />
     </list>
     <ignored path="face_recogintion.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -602,7 +599,14 @@
       <option name="project" value="LOCAL" />
       <updated>1464660999593</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="not_finished_roc">
+      <created>1464673547520</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1464673547520</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TodoView">
@@ -616,7 +620,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="65" y="-4" width="1301" height="772" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19953051" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3287037" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
@@ -666,7 +670,8 @@
     <MESSAGE value="add modules" />
     <MESSAGE value="start-work on ROC" />
     <MESSAGE value="mid-way at implement_roc" />
-    <option name="LAST_COMMIT_MESSAGE" value="mid-way at implement_roc" />
+    <MESSAGE value="not_finished_roc" />
+    <option name="LAST_COMMIT_MESSAGE" value="not_finished_roc" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
