@@ -49,23 +49,23 @@ class FacePCA(object):
     @staticmethod
     def get_mean_image(data, width, height):
         n = data.shape[1]
-        tmpMean = []
-        meanImage = []
+        tmpMean = np.zeros([width, height]).reshape(-1, 1)
+        tmpMean = tmpMean[:, 0]
         for i in range(n):
             tmpData = data[:, i]
-            tmpMean.append(tmpData.mean())
-        tmpMean = np.array(tmpMean).mean()
-        for i in range(width * height):
-            meanImage.append(tmpMean)
-        return np.array(meanImage, np.int32)
+            tmpMean += tmpData
+        return (tmpMean / n)
 
     @staticmethod
-    def get_ssd(imageCounts, wieghtMatrix, projectedImage):
+    def get_ssd(imageCounts, wieghtMatrix, projectedImage, threshold):
         ssdList = []
         projectedImage = projectedImage.reshape(-1, 1)
         for i in range(imageCounts):
             sd = wieghtMatrix[i].reshape(-1, 1)
             ssd = np.sum((sd - projectedImage)**2)
             ssd = np.sqrt(ssd)
-            ssdList.append(ssd)
+            if ssd <= threshold :
+                ssdList.append(1)
+            else:
+                ssdList.append(0)
         return ssdList

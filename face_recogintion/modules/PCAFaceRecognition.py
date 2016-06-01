@@ -4,9 +4,10 @@
 
 import cv2
 import numpy as np
+from matplotlib import pyplot as plt
 
 from modules.AbstractRecogntion import FacePCA
-from matplotlib import pyplot as plt
+
 
 class FaceRecognition(FacePCA):
     def __init__(self, csvFile, count):
@@ -21,14 +22,11 @@ class FaceRecognition(FacePCA):
         self.index = 0
         self.truePositive = 0
         self.falsePositive = 0
-        self.trueNegative = 0
-
         self.TPR = []
         self.FPR = []
 
         self.load_data_from_csv()
         self.__run()
-        self.testImage()
         # self.test()
 
     def load_data_from_csv(self):
@@ -91,9 +89,17 @@ class FaceRecognition(FacePCA):
         self.eigVecs = np.asarray(self.eigVecsNorm)
         self.weight = (self.eigVals / self.eigVals.sum()) * 100
 
-        self.weight = self.weight > 0.5
-        self.eigVecs = self.eigVecs[self.weight]
-        print('eig vectors shape: ', self.eigVecs.shape)
+        ratio = 0
+        self.reducedEigVecs = []
+
+        for i in range(len(self.weight)):
+            ratio += self.weight[i]
+            self.reducedEigVecs.append(self.eigVecs[i])
+            if ratio >= 90.0:
+                break
+
+        self.eigVecs = np.asarray(self.reducedEigVecs)
+        print('eig vectors shape: ', self.reducedEigVecs.shape)
 
     def __calculate_eigfaces(self):
         #   project data on vector to get weight matrix of sads and smiles to get eigin faces
@@ -101,34 +107,17 @@ class FaceRecognition(FacePCA):
         self.projectionMatrix /= self.projectionMatrix.max()
         print('projection matrix(eignfaces): ', self.projectionMatrix.shape)
 
-
     def __calculate_kth_coefficient(self):
         #   project data on vector to get weight matrix of sads and smiles to get eigin faces
         self.weightMatrix = np.dot(self.normalizedData.T, self.projectionMatrix.T)
         print('data weight matrix: ', self.weightMatrix.shape)
 
-    def mean_square_image(self):
-        img = 0
-        for i in range(self.featureVector.shape[1]):
-            tmp = self.featureVector.T
-            tmp = tmp[i]
-            img += (self.meanImage - tmp) ** 2
-
-        img = img / self.featureVector.shape[1]
-        cv2.imshow('img', img)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
-    def recon_image(self):
-        # recons
-        testImage = cv2.imread(self.trainingList[1])
-        testImage = cv2.cvtColor(testImage, cv2.COLOR_BGR2GRAY)
-        testImage = testImage.reshape(-1, 1)
-
-        projectedImage = np.dot(self.projectionMatrix, testImage)
-        projectedImage = np.dot(self.projectionMatrix.T, projectedImage)
-
-        img = self.meanImage.reshape(-1, 1) + projectedImage
+    #   show reconstruction for one image
+    def recong(self):
+        ss = self.weightMatrix[1, :]
+        img = np.dot(ss.T, self.projectionMatrix)
+        img = img.reshape(-1, 1) / img.max()
+        img = img[:, 0] + (self.meanImage / self.meanImage.max())
         img = img.reshape(self.width, self.height)
         cv2.imshow('img', img)
         cv2.waitKey(0)
@@ -144,55 +133,54 @@ class FaceRecognition(FacePCA):
 
         self.__calculate_kth_coefficient()
 
-    def testImage(self):
-        for path in self.testList:
-            testImage = cv2.imread(path)
-            testImage = cv2.cvtColor(testImage, cv2.COLOR_BGR2GRAY)
-            testImage = testImage.reshape(-1, 1)
-            newImage = testImage - self.meanImage.reshape(-1, 1)
-
-            projectedImage = np.dot(self.projectionMatrix, newImage)
-            tmpDis = self.__compare_show(projectedImage)
-            self.ecuDis.append(np.argmin(tmpDis))
-
-        # img = self.featureVector[:, self.ecuDis[17]]
-        # print(self.ecuDis)
-        # img = img.reshape(self.width, self.height)
-        # cv2.imshow('img', img)
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-
+    #   get roc curve
     def test(self):
-        for i in range(10):
-            th = (i+1 / 10) / 2
+        th = 2.5
+        falsePositive = 0
+        truePositive = 0
+        tmpDis = []
+
+        for j in range(10):
+            th += 0.1
             for path in self.testList:
                 testImage = cv2.imread(path)
                 testImage = cv2.cvtColor(testImage, cv2.COLOR_BGR2GRAY)
                 testImage = testImage.reshape(-1, 1)
                 newImage = testImage - self.meanImage.reshape(-1, 1)
                 projectedImage = np.dot(self.projectionMatrix, newImage)
-                projectedImage /= projectedImage.max()
 
                 tmpDis = self.__compare_show(projectedImage, th)    # [200]
                 for i in range(len(tmpDis)):
                     if i == self.index:
                         if tmpDis[self.index] == 1:
-                            self.truePositive += 1
+                            truePositive += 1
                         if tmpDis[self.index+1] == 1:
-                            self.truePositive += 1
+                            truePositive += 1
                     else:
                         if tmpDis[i] == 1:
-                            self.falsePositive += 1
-                        elif tmpDis[i] == 0:
-                            self.trueNegative += 1
+                            falsePositive += 1
                 self.index += 2
-        print('true: ', self.truePositive)
-        print('false: ', self.falsePositive)
 
-    def __compare_show(self, projectedImage):
+            truePositiveRate = truePositive / (truePositive + falsePositive)
+            falsePositiveRate = falsePositive / (truePositive + falsePositive)
+            self.TPR.append(truePositiveRate)
+            self.FPR.append(falsePositiveRate)
+
+            tmpDis.clear()
+            self.truePositive = 0
+            self.falsePositive = 0
+
+        plt.plot(self.TPR, self.FPR)
+        plt.show()
+
+        print(self.TPR)
+        print(self.FPR)
+
+    def __compare_show(self, projectedImage, th):
         #   get ssd of weight matrix and new image
-        ssdb = self.get_ssd(self.weightMatrix.shape[0], self.weightMatrix,
-                            projectedImage)
+        ssdb = self.get_ssd(self.weightMatrix.shape[0],
+                            self.weightMatrix / self.weightMatrix.max(),
+                            projectedImage / projectedImage.max(), th)
 
         return ssdb
 
