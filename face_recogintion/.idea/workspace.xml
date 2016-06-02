@@ -2,8 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8e5b6d41-7808-482f-b860-15882fa46b65" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../basic_tools/.idea/basic_tools.iml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../basic_tools/.idea/misc.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../basic_tools/.idea/modules.xml" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../basic_tools/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/AbstractRecogntion.py" afterPath="$PROJECT_DIR$/modules/AbstractRecogntion.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/modules/PCAFaceRecognition.py" afterPath="$PROJECT_DIR$/modules/PCAFaceRecognition.py" />
     </list>
     <ignored path="face_recogintion.iws" />
@@ -52,17 +55,16 @@
       <file leaf-file-name="PCAFaceRecognition.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/modules/PCAFaceRecognition.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="222">
-              <caret line="125" column="20" selection-start-line="125" selection-start-column="20" selection-end-line="125" selection-end-column="20" />
+            <state relative-caret-position="705">
+              <caret line="99" column="26" selection-start-line="99" selection-start-column="26" selection-end-line="99" selection-end-column="26" />
               <folding>
                 <element signature="e#58#68#0" expanded="true" />
-                <element signature="e#774#2220#0" expanded="false" />
-                <element signature="e#2261#2698#0" expanded="false" />
-                <element signature="e#3570#3869#0" expanded="false" />
-                <element signature="e#3922#4153#0" expanded="false" />
-                <element signature="e#4227#4553#0" expanded="false" />
-                <element signature="e#4584#4753#0" expanded="false" />
-                <element signature="e#4805#6247#0" expanded="false" />
+                <element signature="e#803#2249#0" expanded="false" />
+                <element signature="e#2290#2727#0" expanded="false" />
+                <element signature="e#3592#3891#0" expanded="false" />
+                <element signature="e#3944#4175#0" expanded="false" />
+                <element signature="e#4249#4575#0" expanded="false" />
+                <element signature="e#4606#4775#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -71,8 +73,8 @@
       <file leaf-file-name="AbstractRecogntion.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/modules/AbstractRecogntion.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1098">
-              <caret line="61" column="0" selection-start-line="61" selection-start-column="0" selection-end-line="61" selection-end-column="0" />
+            <state relative-caret-position="201">
+              <caret line="64" column="0" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -142,6 +144,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
@@ -177,7 +180,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -588,7 +590,14 @@
       <option name="project" value="LOCAL" />
       <updated>1464673583624</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="roc_not realistic">
+      <created>1464764494517</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1464764494517</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TodoView">
@@ -602,7 +611,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="65" y="-4" width="1301" height="772" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19953051" sideWeight="0.4897436" order="1" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3287037" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
@@ -653,7 +662,8 @@
     <MESSAGE value="start-work on ROC" />
     <MESSAGE value="mid-way at implement_roc" />
     <MESSAGE value="not_finished_roc" />
-    <option name="LAST_COMMIT_MESSAGE" value="not_finished_roc" />
+    <MESSAGE value="roc_not realistic" />
+    <option name="LAST_COMMIT_MESSAGE" value="roc_not realistic" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -670,24 +680,24 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/modules/PCAFaceRecognition.py</url>
-          <line>142</line>
-          <option name="timeStamp" value="199" />
+          <line>147</line>
+          <option name="timeStamp" value="214" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/modules/PCAFaceRecognition.py</url>
-          <line>163</line>
-          <option name="timeStamp" value="204" />
+          <line>174</line>
+          <option name="timeStamp" value="221" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/modules/PCAFaceRecognition.py</url>
-          <line>94</line>
-          <option name="timeStamp" value="206" />
+          <line>155</line>
+          <option name="timeStamp" value="222" />
         </line-breakpoint>
       </breakpoints>
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="207" />
+      <option name="time" value="223" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -705,13 +715,12 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#58#68#0" expanded="true" />
-            <element signature="e#774#2220#0" expanded="false" />
-            <element signature="e#2261#2698#0" expanded="false" />
-            <element signature="e#3570#3869#0" expanded="false" />
-            <element signature="e#3922#4153#0" expanded="false" />
-            <element signature="e#4227#4553#0" expanded="false" />
-            <element signature="e#4584#4753#0" expanded="false" />
-            <element signature="e#4805#6247#0" expanded="false" />
+            <element signature="e#803#2249#0" expanded="false" />
+            <element signature="e#2290#2727#0" expanded="false" />
+            <element signature="e#3592#3891#0" expanded="false" />
+            <element signature="e#3944#4175#0" expanded="false" />
+            <element signature="e#4249#4575#0" expanded="false" />
+            <element signature="e#4606#4775#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -764,13 +773,12 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#58#68#0" expanded="true" />
-            <element signature="e#774#2220#0" expanded="false" />
-            <element signature="e#2261#2698#0" expanded="false" />
-            <element signature="e#3570#3869#0" expanded="false" />
-            <element signature="e#3922#4153#0" expanded="false" />
-            <element signature="e#4227#4553#0" expanded="false" />
-            <element signature="e#4584#4753#0" expanded="false" />
-            <element signature="e#4805#6247#0" expanded="false" />
+            <element signature="e#803#2249#0" expanded="false" />
+            <element signature="e#2290#2727#0" expanded="false" />
+            <element signature="e#3592#3891#0" expanded="false" />
+            <element signature="e#3944#4175#0" expanded="false" />
+            <element signature="e#4249#4575#0" expanded="false" />
+            <element signature="e#4606#4775#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -840,13 +848,12 @@
           <caret line="226" column="0" selection-start-line="226" selection-start-column="0" selection-end-line="226" selection-end-column="0" />
           <folding>
             <element signature="e#58#68#0" expanded="true" />
-            <element signature="e#774#2220#0" expanded="false" />
-            <element signature="e#2261#2698#0" expanded="false" />
-            <element signature="e#3570#3869#0" expanded="false" />
-            <element signature="e#3922#4153#0" expanded="false" />
-            <element signature="e#4227#4553#0" expanded="false" />
-            <element signature="e#4584#4753#0" expanded="false" />
-            <element signature="e#4805#6247#0" expanded="false" />
+            <element signature="e#803#2249#0" expanded="false" />
+            <element signature="e#2290#2727#0" expanded="false" />
+            <element signature="e#3592#3891#0" expanded="false" />
+            <element signature="e#3944#4175#0" expanded="false" />
+            <element signature="e#4249#4575#0" expanded="false" />
+            <element signature="e#4606#4775#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1123,14 +1130,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/modules/AbstractRecogntion.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1098">
-          <caret line="61" column="0" selection-start-line="61" selection-start-column="0" selection-end-line="61" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_imps/_pydev_execfile.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="306">
@@ -1139,19 +1138,26 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/modules/AbstractRecogntion.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="201">
+          <caret line="64" column="0" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/modules/PCAFaceRecognition.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="222">
-          <caret line="125" column="20" selection-start-line="125" selection-start-column="20" selection-end-line="125" selection-end-column="20" />
+        <state relative-caret-position="705">
+          <caret line="99" column="26" selection-start-line="99" selection-start-column="26" selection-end-line="99" selection-end-column="26" />
           <folding>
             <element signature="e#58#68#0" expanded="true" />
-            <element signature="e#774#2220#0" expanded="false" />
-            <element signature="e#2261#2698#0" expanded="false" />
-            <element signature="e#3570#3869#0" expanded="false" />
-            <element signature="e#3922#4153#0" expanded="false" />
-            <element signature="e#4227#4553#0" expanded="false" />
-            <element signature="e#4584#4753#0" expanded="false" />
-            <element signature="e#4805#6247#0" expanded="false" />
+            <element signature="e#803#2249#0" expanded="false" />
+            <element signature="e#2290#2727#0" expanded="false" />
+            <element signature="e#3592#3891#0" expanded="false" />
+            <element signature="e#3944#4175#0" expanded="false" />
+            <element signature="e#4249#4575#0" expanded="false" />
+            <element signature="e#4606#4775#0" expanded="false" />
           </folding>
         </state>
       </provider>

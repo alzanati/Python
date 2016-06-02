@@ -22,12 +22,14 @@ class FaceRecognition(FacePCA):
         self.index = 0
         self.truePositive = 0
         self.falsePositive = 0
+        self.trueNegative = 0
+
         self.TPR = []
         self.FPR = []
 
         self.load_data_from_csv()
         self.__run()
-        # self.test()
+        self.test()
 
     def load_data_from_csv(self):
         #   load all data sets paths from csv file
@@ -95,11 +97,11 @@ class FaceRecognition(FacePCA):
         for i in range(len(self.weight)):
             ratio += self.weight[i]
             self.reducedEigVecs.append(self.eigVecs[i])
-            if ratio >= 90.0:
+            if ratio >= 92.0:
                 break
 
         self.eigVecs = np.asarray(self.reducedEigVecs)
-        print('eig vectors shape: ', self.reducedEigVecs.shape)
+        print('eig vectors shape: ', self.eigVecs.shape)
 
     def __calculate_eigfaces(self):
         #   project data on vector to get weight matrix of sads and smiles to get eigin faces
@@ -135,13 +137,15 @@ class FaceRecognition(FacePCA):
 
     #   get roc curve
     def test(self):
-        th = 2.5
+        th = 1.7
         falsePositive = 0
         truePositive = 0
+        trueNegative = 0
+        isDiag = False
         tmpDis = []
 
         for j in range(10):
-            th += 0.1
+            th += 0.01
             for path in self.testList:
                 testImage = cv2.imread(path)
                 testImage = cv2.cvtColor(testImage, cv2.COLOR_BGR2GRAY)
@@ -156,21 +160,30 @@ class FaceRecognition(FacePCA):
                             truePositive += 1
                         if tmpDis[self.index+1] == 1:
                             truePositive += 1
+                            isDiag = True
                     else:
                         if tmpDis[i] == 1:
-                            falsePositive += 1
+                            if isDiag == True:
+                                isDiag = False
+                                continue
+                            else:
+                                falsePositive += 1
+                        elif tmpDis[i] == 0:
+                            trueNegative += 1
                 self.index += 2
 
             truePositiveRate = truePositive / (truePositive + falsePositive)
-            falsePositiveRate = falsePositive / (truePositive + falsePositive)
+            falsePositiveRate = falsePositive / (trueNegative)
             self.TPR.append(truePositiveRate)
             self.FPR.append(falsePositiveRate)
 
             tmpDis.clear()
-            self.truePositive = 0
-            self.falsePositive = 0
+            truePositive = 0
+            falsePositive = 0
+            trueNegative = 0
+            self.index = 0
 
-        plt.plot(self.TPR, self.FPR)
+        plt.plot(self.FPR, self.TPR)
         plt.show()
 
         print(self.TPR)
